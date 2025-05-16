@@ -33,6 +33,7 @@ def main():
         BotCommand("start", "Запуск бота"),
         BotCommand("add", "Добавить стикерпак"),
         BotCommand("search", "Поиск по распознанному тексту"),
+        BotCommand("cancel", "Отменить команду")
     ])
 
     print("Бот запущен")
