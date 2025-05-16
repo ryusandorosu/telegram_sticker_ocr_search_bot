@@ -1,14 +1,18 @@
 import sqlite3
-from telegram import Update
-from telegram.ext import ContextTypes
+from telegram import Update, ReplyKeyboardRemove
+from telegram.ext import ContextTypes, ConversationHandler
 from ..config import DB_PATH
 
-# --- Поиск по тексту ---
-async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args:
-        await update.message.reply_text("Укажи ключевое слово для поиска после /search одной строкой")
-        return
-    keyword = " ".join(context.args).lower()
+WAITING_FOR_QUERY = 1
+
+# --- Начало поиска ---
+async def start_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Введи текст для поиска по стикерам:")
+    return WAITING_FOR_QUERY
+
+# --- Обработка поискового запроса ---
+async def receive_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyword = update.message.text.lower().strip()
     user_id = update.effective_user.id
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
@@ -21,7 +25,13 @@ async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ''', (f"%{keyword}%", user_id))
         rows = c.fetchall()
     if not rows:
-        await update.message.reply_text("Ничего не найдено")
+        await update.message.reply_text("Ничего не найдено", reply_markup=ReplyKeyboardRemove())
     else:
         for (file_id,) in rows:
             await update.message.reply_sticker(file_id)
+    return ConversationHandler.END
+
+# --- Отмена ---
+async def cancel_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Поиск отменён.", reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END

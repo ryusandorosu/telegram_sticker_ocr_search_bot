@@ -1,17 +1,21 @@
 import re
 import sqlite3
-from telegram import Update, Sticker
-from telegram.ext import ContextTypes
+from telegram import Update, Sticker, ReplyKeyboardRemove
+from telegram.ext import ContextTypes, ConversationHandler
 from ..ocr import recognize_sticker
 from ..config import DB_PATH
 from .. import logger
 
-# --- Обработка команды /add ---
-async def add_set_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args:
-        await update.message.reply_text("Укажи название стикерпака или ссылку на него сразу после /add одной строкой")
-        return
-    arg = context.args[0]
+WAITING_FOR_SET = 1
+
+# --- Начало команды /add ---
+async def start_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Отправь название или ссылку на стикерпак, который нужно добавить:")
+    return WAITING_FOR_SET
+
+# --- Обработка ввода после /add ---
+async def receive_set_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    arg = update.message.text.strip()
     set_name = re.sub(r"^https://t.me/addstickers/", "", arg)
     try:
         sticker_set = await context.bot.get_sticker_set(set_name)
@@ -19,10 +23,16 @@ async def add_set_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             c = conn.cursor()
             c.execute("INSERT OR IGNORE INTO sticker_sets VALUES (?, ?)", (sticker_set.name, sticker_set.title))
             c.execute("INSERT OR IGNORE INTO user_sets VALUES (?, ?)", (update.effective_user.id, sticker_set.name))
-        await update.message.reply_text(f"Добавлен пак: {sticker_set.title}")
+        await update.message.reply_text(f"Добавлен пак: {sticker_set.title}", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         logger.warning(f"Ошибка при добавлении пака: {e}")
-        await update.message.reply_text("Не удалось найти стикерпак.")
+        await update.message.reply_text("Не удалось найти стикерпак.", reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END
+
+# --- Отмена ---
+async def cancel_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Операция отменена.", reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END
 
 # --- Обработка отправленного стикера ---
 async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
