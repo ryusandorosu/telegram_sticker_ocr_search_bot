@@ -8,5 +8,6 @@ sudo apt install python3.10-venv -y
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+pip install python-dotenv
 pip install -U python-telegram-bot httpx httpcore
 ```
