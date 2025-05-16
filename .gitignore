@@ -1,2 +1,4 @@
 venv
 stickers.db
+.env
+__pycache__
