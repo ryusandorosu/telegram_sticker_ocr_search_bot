@@ -2,7 +2,20 @@ from telegram.ext import ApplicationBuilder, ConversationHandler, CommandHandler
 from telegram import BotCommand
 from functions.config import BOT_TOKEN
 from functions.database import init_db
-from functions.handlers import start, start_add, receive_set_name, cancel_add, handle_sticker, WAITING_FOR_SET, start_search, receive_query, cancel_search, WAITING_FOR_QUERY
+from functions.handlers import (
+    start, start_add, receive_set_name, cancel_add,
+    handle_sticker, WAITING_FOR_SET,
+    start_search, receive_query, cancel_search, WAITING_FOR_QUERY
+)
+
+async def set_commands(app):
+    await app.bot.set_my_commands([
+        BotCommand("start", "Запуск бота"),
+        BotCommand("add", "Добавить стикерпак"),
+        BotCommand("search", "Поиск по распознанному тексту"),
+        BotCommand("cancel", "Отменить команду"),
+        #добавить удаление стикерпака
+    ])
 
 def main():
     init_db()
@@ -27,14 +40,10 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(add_conv)
     app.add_handler(search_conv)
+    app.add_handler(CommandHandler("cancel", cancel_add))
     app.add_handler(MessageHandler(filters.Sticker.ALL, handle_sticker))
 
-    app.bot.set_my_commands([
-        BotCommand("start", "Запуск бота"),
-        BotCommand("add", "Добавить стикерпак"),
-        BotCommand("search", "Поиск по распознанному тексту"),
-        BotCommand("cancel", "Отменить команду")
-    ])
+    app.post_init = set_commands
 
     print("Бот запущен")
     try:

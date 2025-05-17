@@ -7,7 +7,7 @@ WAITING_FOR_SET = 1
 
 # --- Начало команды /add ---
 async def start_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Отправь ссылку на стикерпак, который нужно добавить:")
+    await update.message.reply_text("Отправь стикер или ссылку на стикерпак, который нужно добавить:")
     return WAITING_FOR_SET
 
 # --- Обработка ввода после /add ---
@@ -20,15 +20,21 @@ async def receive_set_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     set_name = match.group(1)
+    progress = await update.message.reply_text("⏳ Началась обработка стикерпака...")
 
     try:
-        success_count, fail_count, title = await add_sticker_pack_by_name(set_name, update.effective_user.id, context.bot)
+        success_count, fail_count, title = await add_sticker_pack_by_name(
+            set_name,
+            update.effective_user.id,
+            context.bot,
+            progress_message=progress
+        )
         await update.message.reply_text(
             f"✅ Добавлено стикеров: {success_count}\n❌ Ошибок: {fail_count}\n📦 Пак: {title}",
             reply_markup=ReplyKeyboardRemove()
         )
-    except Exception:
-        await update.message.reply_text("❌ Не удалось загрузить стикерпак.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Ошибка при загрузке стикерпака. {str(e)}")
 
     return ConversationHandler.END
 
@@ -46,10 +52,17 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ У этого стикера нет набора (set_name отсутствует)")
         return
 
+    progress = await update.message.reply_text("⏳ Началась обработка стикерпака...")
+
     try:
-        success_count, fail_count, title = await add_sticker_pack_by_name(set_name, update.effective_user.id, context.bot)
+        success_count, fail_count, title = await add_sticker_pack_by_name(
+            set_name,
+            update.effective_user.id,
+            context.bot,
+            progress_message=progress
+        )
         await update.message.reply_text(
             f"✅ Обработано стикеров: {success_count}\n❌ Ошибок: {fail_count}\n📦 Пак: {title}"
         )
-    except Exception:
-        await update.message.reply_text("❌ Не удалось загрузить стикерпак.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Ошибка при загрузке стикерпака. {str(e)}")

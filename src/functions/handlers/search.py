@@ -17,7 +17,7 @@ async def receive_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
         c.execute('''
-            SELECT file_id FROM stickers
+            SELECT DISTINCT file_id FROM stickers
             WHERE text LIKE ? AND set_name IN (
                 SELECT set_name FROM user_sets WHERE user_id = ?
             )
