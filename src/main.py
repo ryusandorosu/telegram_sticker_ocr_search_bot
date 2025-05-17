@@ -10,11 +10,12 @@ from functions.handlers import (
 
 async def set_commands(app):
     await app.bot.set_my_commands([
-        BotCommand("start", "Запуск бота"),
+        # BotCommand("start", "Запуск бота"),
         BotCommand("add", "Добавить стикерпак"),
         BotCommand("search", "Поиск по распознанному тексту"),
         BotCommand("cancel", "Отменить команду"),
         #добавить удаление стикерпака
+        #скармливание стикера работает НЕ по /add
     ])
 
 def main():
@@ -37,7 +38,7 @@ def main():
         fallbacks=[CommandHandler("cancel", cancel_search)],
     )
 
-    app.add_handler(CommandHandler("start", start))
+    # app.add_handler(CommandHandler("start", start))
     app.add_handler(add_conv)
     app.add_handler(search_conv)
     app.add_handler(CommandHandler("cancel", cancel_add))

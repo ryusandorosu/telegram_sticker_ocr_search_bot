@@ -41,12 +41,12 @@ async def add_sticker_pack_by_name(set_name: str, user_id: int, bot: Bot, progre
 
             if progress_message:
                 progress_text = (
-                    f"📦 Обработка пака: {sticker_set.title}\n"
+                    f"📦 {sticker_set.title}\n"
                     f"📊 Всего стикеров: {total_count}\n"
                     f"✅ Успешно: {success_count}\n"
                     f"❌ Ошибок: {fail_count}\n"
-                    f"♿️ Обрабатывается: {sticker.file_id}"
-                    f"🔤 Текст: {text or '---'}"
+                    f"♿️ Обрабатывается: {sticker.file_id}\n"
+                    f"🔤 Распознано: {text or '---'}"
                 )
                 try:
                     await progress_message.edit_text(progress_text)

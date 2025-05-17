@@ -20,7 +20,7 @@ async def receive_set_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     set_name = match.group(1)
-    progress = await update.message.reply_text("⏳ Началась обработка стикерпака...")
+    progress = await update.message.reply_text("Началась обработка стикерпака...")
 
     try:
         success_count, fail_count, title = await add_sticker_pack_by_name(
@@ -30,7 +30,7 @@ async def receive_set_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
             progress_message=progress
         )
         await update.message.reply_text(
-            f"✅ Добавлено стикеров: {success_count}\n❌ Ошибок: {fail_count}\n📦 Пак: {title}",
+            f"Обработка стикерпака завершена.",
             reply_markup=ReplyKeyboardRemove()
         )
     except Exception as e:
@@ -52,7 +52,7 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ У этого стикера нет набора (set_name отсутствует)")
         return
 
-    progress = await update.message.reply_text("⏳ Началась обработка стикерпака...")
+    progress = await update.message.reply_text("Началась обработка стикерпака...")
 
     try:
         success_count, fail_count, title = await add_sticker_pack_by_name(
@@ -62,7 +62,7 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
             progress_message=progress
         )
         await update.message.reply_text(
-            f"✅ Обработано стикеров: {success_count}\n❌ Ошибок: {fail_count}\n📦 Пак: {title}"
+            f"Обработка стикерпака завершена."
         )
     except Exception as e:
         await update.message.reply_text(f"❌ Ошибка при загрузке стикерпака. {str(e)}")
